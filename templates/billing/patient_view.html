@@ -1,0 +1,46 @@
+{% extends "billing/_base.html" %}
+
+{% block metrics %}
+<section class="metric-grid" aria-label="Patient summary">
+  <article class="metric-card card">
+    <span class="metric-label">Patients</span>
+    <strong>{{ patients|length }}</strong>
+    <small>Limited records currently visible</small>
+  </article>
+  <article class="metric-card card">
+    <span class="metric-label">Fields</span>
+    <strong>3</strong>
+    <small>User, name, masked phone</small>
+  </article>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="card data-card">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Live data</p>
+      <h2>Limited patients</h2>
+    </div>
+    <span class="count-pill">{{ patients|length }} rows</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>User</th><th>Name</th><th>Masked phone</th></tr>
+      </thead>
+      <tbody>
+        {% for patient in patients %}
+        <tr>
+          <td>{{ patient.get('user_id', '') }}</td>
+          <td>{{ patient.get('display_name', '') }}</td>
+          <td>{{ patient.get('masked_phone', '') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="empty-cell">No limited patient records are available for this signed-in workspace yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

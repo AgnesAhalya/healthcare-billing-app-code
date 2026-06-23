@@ -1,0 +1,72 @@
+{% extends "billing/_base.html" %}
+
+{% block metrics %}
+<section class="metric-grid" aria-label="External payment summary">
+  <article class="metric-card card">
+    <span class="metric-label">Bills</span>
+    <strong>{{ bills|length }}</strong>
+    <small>Bills currently visible</small>
+  </article>
+  <article class="metric-card card">
+    <span class="metric-label">Partner Link</span>
+    <strong>URL</strong>
+    <small>External processor handoff</small>
+  </article>
+</section>
+{% endblock %}
+
+{% block content %}
+{% set result_title = "Processor URL" %}
+{% include "billing/_result_table.html" %}
+
+<section class="action-grid" aria-label="External payment actions">
+  <form class="card action-card" method="post">
+    <div class="section-heading compact">
+      <div><p class="eyebrow">Workflow action</p><h2>Prepare processor link</h2></div>
+      <span class="form-index">1</span>
+    </div>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fields">
+      <div class="field-block kind-select">
+        <label for="billing-005-bill-id">Bill</label>
+        <select id="billing-005-bill-id" name="bill_id">
+          {% for bill in bills %}
+          <option value="{{ bill.get('bill_id', '') }}">{{ bill.get('description', bill.get('bill_id', 'record')) }}</option>
+          {% else %}
+          <option value="" disabled>No available bills</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field-block kind-text">
+        <label for="billing-005-processor-host">Processor host</label>
+        <input id="billing-005-processor-host" name="processor_host" value="{{ processor_host }}">
+      </div>
+    </div>
+    <button type="submit">Prepare link</button>
+  </form>
+</section>
+
+<section class="card data-card">
+  <div class="section-heading">
+    <div><p class="eyebrow">Live data</p><h2>Bills</h2></div>
+    <span class="count-pill">{{ bills|length }} rows</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Bill</th><th>Patient</th><th>Description</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for bill in bills %}
+        <tr>
+          <td>{{ bill.get('bill_id', '') }}</td>
+          <td>{{ bill.get('display_name', '') }}</td>
+          <td>{{ bill.get('description', '') }}</td>
+          <td><span class="status-chip">{{ bill.get('status', '') }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty-cell">No bill records are available for this signed-in workspace yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

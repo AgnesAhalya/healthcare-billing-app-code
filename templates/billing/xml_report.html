@@ -1,0 +1,38 @@
+{% extends "billing/_base.html" %}
+
+{% block metrics %}
+<section class="metric-grid" aria-label="XML report summary">
+  <article class="metric-card card">
+    <span class="metric-label">Actions</span>
+    <strong>1</strong>
+    <small>XML path report workflow</small>
+  </article>
+  <article class="metric-card card">
+    <span class="metric-label">Input</span>
+    <strong>XPath</strong>
+    <small>Billing export filter</small>
+  </article>
+</section>
+{% endblock %}
+
+{% block content %}
+{% set result_title = "XML report rows" %}
+{% include "billing/_result_table.html" %}
+
+<section class="action-grid" aria-label="XML report actions">
+  <form class="card action-card" method="post">
+    <div class="section-heading compact">
+      <div><p class="eyebrow">Workflow action</p><h2>Run path</h2></div>
+      <span class="form-index">1</span>
+    </div>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fields">
+      <div class="field-block kind-text">
+        <label for="billing-007-xpath">XML path</label>
+        <input id="billing-007-xpath" name="xpath" value="{{ xpath }}" required>
+      </div>
+    </div>
+    <button type="submit">Run XML report</button>
+  </form>
+</section>
+{% endblock %}

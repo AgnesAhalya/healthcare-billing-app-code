@@ -1,0 +1,62 @@
+{% extends "billing/_base.html" %}
+
+{% block metrics %}
+<section class="metric-grid" aria-label="Billing report summary">
+  <article class="metric-card card">
+    <span class="metric-label">Bills</span>
+    <strong>{{ bills|length }}</strong>
+    <small>Current bill records</small>
+  </article>
+  <article class="metric-card card">
+    <span class="metric-label">Reports</span>
+    <strong>SQL</strong>
+    <small>Status filter workflow</small>
+  </article>
+</section>
+{% endblock %}
+
+{% block content %}
+{% set result_title = "Report rows" %}
+{% include "billing/_result_table.html" %}
+
+<section class="action-grid" aria-label="Billing report actions">
+  <form class="card action-card" method="post">
+    <div class="section-heading compact">
+      <div><p class="eyebrow">Workflow action</p><h2>Run report</h2></div>
+      <span class="form-index">1</span>
+    </div>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fields">
+      <div class="field-block kind-text">
+        <label for="billing-006-where-clause">SQL where clause</label>
+        <input id="billing-006-where-clause" name="where_clause" value="{{ where_clause }}" required>
+      </div>
+    </div>
+    <button type="submit">Run</button>
+  </form>
+</section>
+
+<section class="card data-card">
+  <div class="section-heading">
+    <div><p class="eyebrow">Live data</p><h2>Current bills</h2></div>
+    <span class="count-pill">{{ bills|length }} rows</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Bill</th><th>Patient</th><th>Amount cents</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for bill in bills %}
+        <tr>
+          <td>{{ bill.get('bill_id', '') }}</td>
+          <td>{{ bill.get('display_name', '') }}</td>
+          <td>{{ bill.get('amount_cents', '') }}</td>
+          <td><span class="status-chip">{{ bill.get('status', '') }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty-cell">No bill records are available for this signed-in workspace yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

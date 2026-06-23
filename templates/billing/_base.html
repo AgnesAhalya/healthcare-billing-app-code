@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ page_title }}{% endblock %} | Billing Desk</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/patient.css') }}">
+</head>
+<body class="app-body role-billing_staff">
+  <div class="app-shell">
+    <aside class="sidebar card">
+      <a class="brand" href="/billing-patient-view" aria-label="Healthcare portal home">
+        <span class="brand-mark">💳</span>
+        <span>
+          <strong>Billing Desk</strong>
+          <small>Patient billing and payments</small>
+        </span>
+      </a>
+
+      {% if role_nav_links %}
+      <nav class="side-nav" aria-label="Role navigation">
+        {% for label, href in role_nav_links %}
+        <a class="{{ 'active' if href == request.path else '' }}" href="{{ href }}">
+          <span>{{ label }}</span>
+          <span class="chevron">›</span>
+        </a>
+        {% endfor %}
+      </nav>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('patient_002.logout_ui') }}" class="sidebar-logout">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="secondary full-width" type="submit">Sign out</button>
+      </form>
+    </aside>
+
+    <main class="workspace">
+      <section class="page-hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">Billing</p>
+          <h1>{{ page_title }}</h1>
+          <p>{{ page_description }}</p>
+        </div>
+        <div class="hero-status">
+          <span class="actor-pill">{{ actor_label }}</span>
+        </div>
+      </section>
+
+      {% block metrics %}{% endblock %}
+
+      {% if message %}
+      <section class="notice success" role="status">
+        <strong>{{ message }}</strong>
+        {% if result %}<span>{{ result|length }} returned item{{ '' if result|length == 1 else 's' }}</span>{% endif %}
+      </section>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

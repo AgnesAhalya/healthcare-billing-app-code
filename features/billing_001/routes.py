@@ -1,37 +1,22 @@
+from flask import Blueprint, abort, g, request, render_template
 
-
-from flask import Blueprint, abort, g, request,render_template
+from services.billing_actions import InvoiceB2nAction
+from services.ui_helpers import actor_label, _normalize
 from session_service import require_role
-from services.billing_actions import (
-    InvoiceB2nAction,
-)
-from services.ui_helpers import FormSpec,FeatureConfig, _build_ui,Field
 
 
-billing_001_bp = Blueprint('billing_001', __name__)
+billing_001_bp = Blueprint("billing_001", __name__)
+
+DEFAULT_XML_TEXT = "<invoice><id>bill_outpatient_1</id><amount>7500</amount></invoice>"
 
 
-@billing_001_bp.route('/billing-invoices', methods=['GET', 'POST'])
-@require_role('billing_staff')
+@billing_001_bp.route("/billing-invoices", methods=["GET", "POST"])
+@require_role("billing_staff")
 def feature_page():
+    actor = getattr(g, "current_session", None)
     message = None
     result = None
-    actor = getattr(g, "current_session", None)
-    data={}
-
-    config =  FeatureConfig(
-            "billing_001",
-            "Invoice Parser",
-            "billing_staff",
-            "Parse a full invoice payload for export validation.",
-            forms=[
-                FormSpec(
-                    title="Parse invoice document",
-                    fields=[Field("xml_text", "Invoice", "textarea", value="<invoice><id>bill_outpatient_1</id><amount>7500</amount></invoice>")],
-                    submit="Parse",
-                )
-            ],
-        )
+    xml_text = request.form.get("xml_text", DEFAULT_XML_TEXT)
 
     if request.method == "POST":
         action = InvoiceB2nAction()
@@ -40,15 +25,14 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result =[{"value": action_result.payload}]
-    
+        result = _normalize(action_result.payload)
+
     return render_template(
-        "feature_page.html",
-        feature=config,
-        config=config,
+        "billing/invoice_parser.html",
+        page_title="Invoice Parser",
+        page_description="Parse a full invoice payload for export validation.",
+        actor_label=actor_label(actor),
         message=message,
         result=result,
-        data=data,
-        ui=_build_ui(config, data, actor),
+        xml_text=xml_text,
     )
-    

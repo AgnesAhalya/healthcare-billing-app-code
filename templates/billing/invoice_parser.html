@@ -1,0 +1,41 @@
+{% extends "billing/_base.html" %}
+
+{% block metrics %}
+<section class="metric-grid" aria-label="Invoice parser summary">
+  <article class="metric-card card">
+    <span class="metric-label">Actions</span>
+    <strong>1</strong>
+    <small>Invoice parsing workflow</small>
+  </article>
+  <article class="metric-card card">
+    <span class="metric-label">Input</span>
+    <strong>XML</strong>
+    <small>Full invoice payload</small>
+  </article>
+</section>
+{% endblock %}
+
+{% block content %}
+{% set result_title = "Parsed invoice" %}
+{% include "billing/_result_table.html" %}
+
+<section class="action-grid" aria-label="Invoice parser actions">
+  <form class="card action-card" method="post">
+    <div class="section-heading compact">
+      <div>
+        <p class="eyebrow">Workflow action</p>
+        <h2>Parse invoice document</h2>
+      </div>
+      <span class="form-index">1</span>
+    </div>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fields">
+      <div class="field-block kind-textarea">
+        <label for="billing-001-xml-text">Invoice</label>
+        <textarea id="billing-001-xml-text" name="xml_text">{{ xml_text }}</textarea>
+      </div>
+    </div>
+    <button type="submit">Parse</button>
+  </form>
+</section>
+{% endblock %}

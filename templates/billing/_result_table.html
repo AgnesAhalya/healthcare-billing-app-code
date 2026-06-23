@@ -1,0 +1,23 @@
+{% if result %}
+<section class="card result-card">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Action output</p>
+      <h2>{{ result_title|default('Result') }}</h2>
+    </div>
+    <span class="count-pill">{{ result|length }} item{{ '' if result|length == 1 else 's' }}</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>{% for key in result[0].keys() %}<th>{{ key|replace('_', ' ')|title }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for row in result %}
+        <tr>{% for value in row.values() %}<td><pre class="inline-pre">{{ value }}</pre></td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}

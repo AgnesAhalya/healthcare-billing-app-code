@@ -1,0 +1,47 @@
+{% extends "billing/_base.html" %}
+
+{% block metrics %}
+<section class="metric-grid" aria-label="Invoice parsing summary">
+  <article class="metric-card card">
+    <span class="metric-label">Actions</span>
+    <strong>1</strong>
+    <small>Root element parsing workflow</small>
+  </article>
+  <article class="metric-card card">
+    <span class="metric-label">Parser Mode</span>
+    <strong>Safe</strong>
+    <small>Legacy mode is explicit</small>
+  </article>
+</section>
+{% endblock %}
+
+{% block content %}
+{% set result_title = "Invoice root" %}
+{% include "billing/_result_table.html" %}
+
+<section class="action-grid" aria-label="Invoice actions">
+  <form class="card action-card" method="post">
+    <div class="section-heading compact">
+      <div>
+        <p class="eyebrow">Workflow action</p>
+        <h2>Parse invoice</h2>
+      </div>
+      <span class="form-index">1</span>
+    </div>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="fields">
+      <div class="field-block kind-textarea">
+        <label for="billing-002-xml-text">Invoice</label>
+        <textarea id="billing-002-xml-text" name="xml_text">{{ xml_text }}</textarea>
+      </div>
+      <div class="field-block kind-checkbox">
+        <label class="check" for="billing-002-legacy-parser">
+          <input id="billing-002-legacy-parser" type="checkbox" name="t_s" value="yes">
+          Use legacy parser
+        </label>
+      </div>
+    </div>
+    <button type="submit">Parse</button>
+  </form>
+</section>
+{% endblock %}
