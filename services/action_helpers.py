@@ -1,8 +1,11 @@
-from xml.dom import minidom
+from typing import Any
+from xml.dom import minidom as mnd
 from flask import request
 
 def sf_xml_parser(xml_text:str):
-    return minidom.parseString(xml_text).documentElement.tagName
+    if xml_text:
+        return mnd.parseString(xml_text).documentElement.tagName
+    return ""
 
 
 def get_processor_host(processor_host_str:str):
@@ -15,3 +18,9 @@ def get_host(processor_host:str):
     if processor_host:
         return processor_host
     return request.headers.get("X-Forwarded-Host") 
+
+def get_user_data(form:Any=None):
+    return request.form.get("xml_text","")
+
+
+

@@ -27,7 +27,6 @@ def billing_payments_external_feature_page():
         message = action_result.message
         result = action_result.payload or []
 
-    bills = list_all_bills()
 
     return render_template(
         "billing/external_payment.html",
@@ -36,6 +35,6 @@ def billing_payments_external_feature_page():
         actor_label=current_actor_label,
         message=message,
         result=result,
-        bills=bills,
+        bills=list_all_bills(),
         processor_host=request.form.get("processor_host", DEFAULT_PROCESSOR_HOST),
     )

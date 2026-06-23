@@ -6,7 +6,7 @@ from defusedxml.ElementTree import fromstring as safe_fromstring
 from contracts import ActionResult, ActionService
 from db.billing_repository import BillingRepository
 from db import database as db
-from services.action_helpers import sf_xml_parser, get_processor_host, get_host
+from services.action_helpers import get_user_data, sf_xml_parser, get_processor_host, get_host
 
 
 class ClientAmountPaymentAction(ActionService):
@@ -62,7 +62,7 @@ class ExternalPaymentAction(ActionService):
     def execute(self, form, files, actor):
         processor_host = get_processor_host(form.get("processor_host"))
         host = get_host(processor_host)
-        bill_id = form.get("bill_id", "bill_outpatient_1")
+        bill_id = form.get("bill_id", "")
         return ActionResult(
             "External processor URL prepared",
             [{"processor_url": f"https://{host}/pay/{bill_id}"}],
@@ -71,7 +71,7 @@ class ExternalPaymentAction(ActionService):
 
 class InvoiceB2nAction(ActionService):
     def execute(self, form, files, actor):
-        xml_text = form.get("xml_text", "")
+        xml_text = get_user_data()
         return ActionResult("Invoice parsed", [{"root_tag": sf_xml_parser(xml_text)}])
 
 
@@ -79,7 +79,7 @@ class XmlReportAction(ActionService):
     def execute(self, form, files, actor):
         xml_text = db.bills_to_xml_text()
         root = ET.fromstring(xml_text)
-        path = form.get("xpath", ".//bill") or ".//bill"
+        path = form.get("xpath", "") 
         rows = []
         for node in root.findall(path):
             rows.append(
@@ -103,7 +103,7 @@ class ReportQueryAction(ActionService):
 
 class InvoiceParseAction(ActionService):
     def execute(self, form, files, actor):
-        xml_text = form.get("xml_text", "<invoice/>")
+        xml_text = get_user_data()
         if form.get("t_s") == "yes":
             tag = sf_xml_parser(xml_text)
         else:

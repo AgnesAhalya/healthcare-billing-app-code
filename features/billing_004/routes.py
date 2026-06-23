@@ -25,9 +25,6 @@ def billing_payments_feature_page():
         message = action_result.message
         result = action_result.payload or []
 
-    bills = list_all_bills()
-    payments = list_payment_entries()
-
     return render_template(
         "billing/payment_entry.html",
         page_title="Payment Entry",
@@ -35,8 +32,8 @@ def billing_payments_feature_page():
         actor_label=current_actor_label,
         message=message,
         result=result,
-        bills=bills,
-        payments=payments,
+        bills=list_all_bills(),
+        payments=list_payment_entries(),
         user_id=request.form.get("user_id", "user_outpatient_1"),
         amount_cents=request.form.get("amount_cents", "7500"),
         note=request.form.get("note", ""),

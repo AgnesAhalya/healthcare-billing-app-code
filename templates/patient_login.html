@@ -20,9 +20,9 @@
       <form method="post" class="stacked-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="username">Username</label>
-        <input id="username" name="username" required autocomplete="username" value="billing">
+        <input id="username" name="username" required autocomplete="username" value="">
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" required autocomplete="current-password" value="staff-pass">
+        <input id="password" name="password" type="password" required autocomplete="current-password" value="">
         <input type="hidden" name="usertype" value="billing_staff">
         <button type="submit">Open billing workspace</button>
         {% if error %}<p class="notice error">{{ error }}</p>{% endif %}

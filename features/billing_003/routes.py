@@ -12,7 +12,6 @@ billing_003_bp = Blueprint("billing_003", __name__)
 def billing_patient_view_feature_page():
     actor = getattr(g, "current_session", None)
     current_actor_label = actor.user_id if actor is not None else "Active session"
-    patients = list_limited_patients()
 
     return render_template(
         "billing/patient_view.html",
@@ -21,5 +20,5 @@ def billing_patient_view_feature_page():
         actor_label=current_actor_label,
         message=None,
         result=None,
-        patients=patients,
+        patients=list_limited_patients(),
     )

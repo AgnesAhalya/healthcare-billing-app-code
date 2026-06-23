@@ -2,11 +2,12 @@ from flask import Blueprint, abort, g, request, render_template
 
 from services.billing_actions import InvoiceB2nAction
 from session_service import require_role
+from services.action_helpers import get_user_data
 
 
 billing_001_bp = Blueprint("billing_001", __name__)
 
-DEFAULT_XML_TEXT = "<invoice><id>bill_outpatient_1</id><amount>7500</amount></invoice>"
+# DEFAULT_XML_TEXT = "<invoice><id>test</id><amount>7500</amount></invoice>"
 
 
 @billing_001_bp.route("/billing-invoices", methods=["GET", "POST"])
@@ -16,7 +17,6 @@ def billing_invoices_feature_page():
     current_actor_label = actor.user_id if actor is not None else "Active session"
     message = None
     result = []
-    xml_text = request.form.get("xml_text", DEFAULT_XML_TEXT)
 
     if request.method == "POST":
         action = InvoiceB2nAction()
@@ -34,5 +34,5 @@ def billing_invoices_feature_page():
         actor_label=current_actor_label,
         message=message,
         result=result,
-        xml_text=xml_text,
+        xml_text=get_user_data(),
     )

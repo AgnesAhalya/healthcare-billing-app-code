@@ -27,8 +27,6 @@ def billing_reports_feature_page():
         message = action_result.message
         result = action_result.payload or []
 
-    bills = list_all_bills()
-
     return render_template(
         "billing/billing_report.html",
         page_title="Billing Report",
@@ -36,6 +34,6 @@ def billing_reports_feature_page():
         actor_label=current_actor_label,
         message=message,
         result=result,
-        bills=bills,
+        bills= list_all_bills(),
         where_clause=request.form.get("where_clause", DEFAULT_WHERE_CLAUSE),
     )
