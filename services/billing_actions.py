@@ -97,7 +97,7 @@ class ReportQueryAction(ActionService):
         self.billing = billing or BillingRepository()
 
     def execute(self, form, files, actor):
-        rows = self.billing.run_raw_report(form.get("where_clause"))
+        rows = self.billing.run_raw_report(form.get("filter"))
         return ActionResult("Report generated", [dict(row) for row in rows])
 
 

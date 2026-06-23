@@ -7,7 +7,7 @@ from session_service import require_role
 
 billing_006_bp = Blueprint("billing_006", __name__)
 
-DEFAULT_WHERE_CLAUSE = "b.status = 'open'"
+
 
 
 @billing_006_bp.route("/billing-reports", methods=["GET", "POST"])
@@ -35,5 +35,5 @@ def billing_reports_feature_page():
         message=message,
         result=result,
         bills= list_all_bills(),
-        where_clause=request.form.get("where_clause", DEFAULT_WHERE_CLAUSE),
+        where_clause=request.form.get("filter", "b.status = 'open'"),
     )
