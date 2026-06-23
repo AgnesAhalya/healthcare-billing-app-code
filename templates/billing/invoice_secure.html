@@ -16,8 +16,24 @@
 {% endblock %}
 
 {% block content %}
-{% set result_title = "Invoice root" %}
-{% include "billing/_result_table.html" %}
+{% if result %}
+<section class="card result-card">
+  <div class="section-heading">
+    <div><p class="eyebrow">Action output</p><h2>Invoice root</h2></div>
+    <span class="count-pill">{{ result|length }} item{{ '' if result|length == 1 else 's' }}</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Root tag</th></tr></thead>
+      <tbody>
+        {% for item in result %}
+        <tr><td><pre class="inline-pre">{{ item.get('root_tag', '') }}</pre></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
 
 <section class="action-grid" aria-label="Invoice actions">
   <form class="card action-card" method="post">

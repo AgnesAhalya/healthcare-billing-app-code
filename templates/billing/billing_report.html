@@ -16,8 +16,29 @@
 {% endblock %}
 
 {% block content %}
-{% set result_title = "Report rows" %}
-{% include "billing/_result_table.html" %}
+{% if result %}
+<section class="card result-card">
+  <div class="section-heading">
+    <div><p class="eyebrow">Action output</p><h2>Report rows</h2></div>
+    <span class="count-pill">{{ result|length }} item{{ '' if result|length == 1 else 's' }}</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Bill</th><th>Patient</th><th>Amount cents</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for row in result %}
+        <tr>
+          <td><pre class="inline-pre">{{ row.get('bill_id', '') }}</pre></td>
+          <td><pre class="inline-pre">{{ row.get('display_name', '') }}</pre></td>
+          <td><pre class="inline-pre">{{ row.get('amount_cents', '') }}</pre></td>
+          <td><pre class="inline-pre">{{ row.get('status', '') }}</pre></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
 
 <section class="action-grid" aria-label="Billing report actions">
   <form class="card action-card" method="post">

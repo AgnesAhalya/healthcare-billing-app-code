@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, g, request, render_template
 
-from services.billing_actions import AllBillReader, C2ePaymentAction, PaymentEntryReader
-from services.ui_helpers import actor_label, safe_read_rows, _normalize
+from services.billing_actions import C2ePaymentAction
+from services.billing_readers import list_all_bills, list_payment_entries
 from session_service import require_role
 
 
@@ -10,10 +10,11 @@ billing_004_bp = Blueprint("billing_004", __name__)
 
 @billing_004_bp.route("/billing-payments", methods=["GET", "POST"])
 @require_role("billing_staff")
-def feature_page():
+def billing_payments_feature_page():
     actor = getattr(g, "current_session", None)
+    current_actor_label = actor.user_id if actor is not None else "Active session"
     message = None
-    result = None
+    result = []
 
     if request.method == "POST":
         action = C2ePaymentAction()
@@ -22,16 +23,16 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result = _normalize(action_result.payload)
+        result = action_result.payload or []
 
-    bills = safe_read_rows(AllBillReader(), actor)
-    payments = safe_read_rows(PaymentEntryReader(), actor)
+    bills = list_all_bills()
+    payments = list_payment_entries()
 
     return render_template(
         "billing/payment_entry.html",
         page_title="Payment Entry",
         page_description="Create a payment entry for a patient bill.",
-        actor_label=actor_label(actor),
+        actor_label=current_actor_label,
         message=message,
         result=result,
         bills=bills,

@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, g, request, render_template
 
-from services.billing_actions import AllBillReader, ExternalPaymentAction
-from services.ui_helpers import actor_label, safe_read_rows, _normalize
+from services.billing_actions import ExternalPaymentAction
+from services.billing_readers import list_all_bills
 from session_service import require_role
 
 
@@ -12,10 +12,11 @@ DEFAULT_PROCESSOR_HOST = "processor.health.local"
 
 @billing_005_bp.route("/billing-payments-external", methods=["GET", "POST"])
 @require_role("billing_staff")
-def feature_page():
+def billing_payments_external_feature_page():
     actor = getattr(g, "current_session", None)
+    current_actor_label = actor.user_id if actor is not None else "Active session"
     message = None
-    result = None
+    result = []
 
     if request.method == "POST":
         action = ExternalPaymentAction()
@@ -24,15 +25,15 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result = _normalize(action_result.payload)
+        result = action_result.payload or []
 
-    bills = safe_read_rows(AllBillReader(), actor)
+    bills = list_all_bills()
 
     return render_template(
         "billing/external_payment.html",
         page_title="External Payment",
         page_description="Prepare a payment processor URL for an external billing partner.",
-        actor_label=actor_label(actor),
+        actor_label=current_actor_label,
         message=message,
         result=result,
         bills=bills,

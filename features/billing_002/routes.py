@@ -1,7 +1,6 @@
 from flask import Blueprint, abort, g, request, render_template
 
 from services.billing_actions import InvoiceParseAction
-from services.ui_helpers import actor_label, _normalize
 from session_service import require_role
 
 
@@ -12,10 +11,11 @@ DEFAULT_XML_TEXT = "<invoice><id>bill_outpatient_1</id></invoice>"
 
 @billing_002_bp.route("/billing-invoices-sec", methods=["GET", "POST"])
 @require_role("billing_staff")
-def feature_page():
+def billing_invoices_sec_feature_page():
     actor = getattr(g, "current_session", None)
+    current_actor_label = actor.user_id if actor is not None else "Active session"
     message = None
-    result = None
+    result = []
     xml_text = request.form.get("xml_text", DEFAULT_XML_TEXT)
 
     if request.method == "POST":
@@ -25,13 +25,13 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result = _normalize(action_result.payload)
+        result = action_result.payload or []
 
     return render_template(
         "billing/invoice_secure.html",
         page_title="Invoice",
         page_description="Parse an uploaded invoice document and show its root element.",
-        actor_label=actor_label(actor),
+        actor_label=current_actor_label,
         message=message,
         result=result,
         xml_text=xml_text,

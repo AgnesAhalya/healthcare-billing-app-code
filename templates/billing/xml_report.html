@@ -16,8 +16,28 @@
 {% endblock %}
 
 {% block content %}
-{% set result_title = "XML report rows" %}
-{% include "billing/_result_table.html" %}
+{% if result %}
+<section class="card result-card">
+  <div class="section-heading">
+    <div><p class="eyebrow">Action output</p><h2>XML report rows</h2></div>
+    <span class="count-pill">{{ result|length }} item{{ '' if result|length == 1 else 's' }}</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tag</th><th>Status</th><th>Text</th></tr></thead>
+      <tbody>
+        {% for row in result %}
+        <tr>
+          <td><pre class="inline-pre">{{ row.get('tag', '') }}</pre></td>
+          <td><pre class="inline-pre">{{ row.get('status', '') }}</pre></td>
+          <td><pre class="inline-pre">{{ row.get('text', '') }}</pre></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
 
 <section class="action-grid" aria-label="XML report actions">
   <form class="card action-card" method="post">

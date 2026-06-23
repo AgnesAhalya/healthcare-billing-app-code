@@ -16,8 +16,27 @@
 {% endblock %}
 
 {% block content %}
-{% set result_title = "Created payment" %}
-{% include "billing/_result_table.html" %}
+{% if result %}
+<section class="card result-card">
+  <div class="section-heading">
+    <div><p class="eyebrow">Action output</p><h2>Created payment</h2></div>
+    <span class="count-pill">{{ result|length }} item{{ '' if result|length == 1 else 's' }}</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Payment</th><th>Amount cents</th></tr></thead>
+      <tbody>
+        {% for item in result %}
+        <tr>
+          <td><pre class="inline-pre">{{ item.get('payment_id', '') }}</pre></td>
+          <td><pre class="inline-pre">{{ item.get('amount_cents', '') }}</pre></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
 
 <section class="action-grid" aria-label="Payment entry actions">
   <form class="card action-card" method="post">

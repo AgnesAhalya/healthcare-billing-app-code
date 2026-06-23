@@ -80,7 +80,7 @@ def login_page():
                 session.clear()
                 session["access_token"] = token
                 session["usertype"] = usertype
-                return redirect(url_for("billing_003.feature_page"))
+                return redirect(url_for("billing_003.billing_patient_view_feature_page"))
     return render_template("patient_login.html", error=error)
 
 
@@ -141,7 +141,7 @@ def create_app():
         if token:
             try:
                 if load_current_session(token, "billing_staff") is not None:
-                    return redirect(url_for("billing_003.feature_page"))
+                    return redirect(url_for("billing_003.billing_patient_view_feature_page"))
             except Exception:
                 session.clear()
         return redirect(url_for("patient_002.login_page"))

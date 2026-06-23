@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, g, request, render_template
 
-from services.billing_actions import AllBillReader, ReportQueryAction
-from services.ui_helpers import actor_label, safe_read_rows, _normalize
+from services.billing_actions import ReportQueryAction
+from services.billing_readers import list_all_bills
 from session_service import require_role
 
 
@@ -12,10 +12,11 @@ DEFAULT_WHERE_CLAUSE = "b.status = 'open'"
 
 @billing_006_bp.route("/billing-reports", methods=["GET", "POST"])
 @require_role("billing_staff")
-def feature_page():
+def billing_reports_feature_page():
     actor = getattr(g, "current_session", None)
+    current_actor_label = actor.user_id if actor is not None else "Active session"
     message = None
-    result = None
+    result = []
 
     if request.method == "POST":
         action = ReportQueryAction()
@@ -24,15 +25,15 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result = _normalize(action_result.payload)
+        result = action_result.payload or []
 
-    bills = safe_read_rows(AllBillReader(), actor)
+    bills = list_all_bills()
 
     return render_template(
         "billing/billing_report.html",
         page_title="Billing Report",
         page_description="Run billing status reports over invoices and patients.",
-        actor_label=actor_label(actor),
+        actor_label=current_actor_label,
         message=message,
         result=result,
         bills=bills,
