@@ -33,6 +33,9 @@ class BillingRepository(Repository):
         return db.list_payments_for_user(user_id)
     def list_all_bills(self):
         return db.list_all_bills()
+    
     def run_raw_report(self, filter):
-        return db.raw_report_query(filter=filter)
+        #Testing need to revert this line
+        with db as database_rep:
+            return database_rep.raw_report_query(filter=filter)
 
