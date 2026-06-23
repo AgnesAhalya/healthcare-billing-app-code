@@ -133,8 +133,9 @@ def list_payment_entries():
     with get_connection() as conn:
         return conn.execute("SELECT py.payment_id, py.bill_id, p.display_name, py.amount_cents, py.note, py.created_at FROM HEALTHCARE_001_payments py LEFT JOIN HEALTHCARE_001_profiles p ON p.user_id = py.user_id ORDER BY py.created_at DESC").fetchall()
 
-def raw_report_query(where_clause):
+def raw_report_query(filter):
     with get_connection() as conn:
+        where_clause=get_where_clause(filter=filter)
         return conn.execute(where_clause).fetchall()
     
 def get_where_clause(filter:str):

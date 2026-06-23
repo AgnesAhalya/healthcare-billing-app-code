@@ -34,6 +34,5 @@ class BillingRepository(Repository):
     def list_all_bills(self):
         return db.list_all_bills()
     def run_raw_report(self, filter):
-        where_clause=db.get_where_clause(filter=filter)
-        return db.raw_report_query(where_clause=where_clause)
+        return db.raw_report_query(filter=filter)
 
