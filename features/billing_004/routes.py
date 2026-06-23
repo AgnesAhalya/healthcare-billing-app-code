@@ -1,11 +1,11 @@
-from flask import Blueprint, abort, g, request
+from flask import Blueprint, abort, g, request,render_template
 from session_service import require_role
 from services.billing_actions import (
     C2ePaymentAction,
 )
 
 from services.billing_actions import AllBillReader,PaymentEntryReader
-from services.feature_helpers import f, form, table,FeatureConfig,run_feature
+from services.ui_helpers import FormSpec, TableSpec,FeatureConfig, _build_ui, _normalize,Field
 
 billing_004_bp = Blueprint('billing_004', __name__)
 
@@ -16,6 +16,7 @@ def feature_page():
     message = None
     result = None
     actor = getattr(g, "current_session", None)
+    data={}
     config = FeatureConfig(
             "billing_004",
             "Payment Entry",
@@ -23,20 +24,20 @@ def feature_page():
             "Create a payment entry for a patient bill.",
             readers={"bills": AllBillReader(), "payments": PaymentEntryReader()},
             forms=[
-                form(
-                    "Create payment entry",
-                    [
-                        f("bill_id", "Bill", "select", options_from="bills", option_value="bill_id", option_label="description"),
-                        f("user_id", "Patient user ID", value="user_outpatient_1", required=True),
-                        f("amount_cents", "Amount cents", value="7500", required=True),
-                        f("note", "Note", example="Counter payment"),
+                FormSpec(
+                    title="Create payment entry",
+                    fields=[
+                        Field("bill_id", "Bill", "select", options_from="bills", option_value="bill_id", option_label="description"),
+                        Field("user_id", "Patient user ID", value="user_outpatient_1", required=True),
+                        Field("amount_cents", "Amount cents", value="7500", required=True),
+                        Field("note", "Note", example="Counter payment"),
                     ],
                     submit="Create entry",
                 )
             ],
             tables=[
-                table("Bills", "bills", [("bill_id", "Bill"), ("display_name", "Patient"), ("amount_cents", "Amount cents"), ("status", "Status")]),
-                table("Payments", "payments", [("payment_id", "Payment"), ("bill_id", "Bill"), ("display_name", "Patient"), ("amount_cents", "Amount cents"), ("note", "Note")]),
+                TableSpec("Bills", "bills", [("bill_id", "Bill"), ("display_name", "Patient"), ("amount_cents", "Amount cents"), ("status", "Status")]),
+                TableSpec("Payments", "payments", [("payment_id", "Payment"), ("bill_id", "Bill"), ("display_name", "Patient"), ("amount_cents", "Amount cents"), ("note", "Note")]),
             ],
         )
 
@@ -47,6 +48,20 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result = action_result.payload
+        result =_normalize(action_result.payload)
+        
+    for key, reader in config.readers.items():
+        try:
+            data[key] = _normalize(reader.read(actor))
+        except Exception:
+            data[key] = [{"error": "Data is misformed"}]
 
-    return run_feature("billing_004", message=message, result=result, actor=actor,config=config)
+    return render_template(
+        "feature_page.html",
+        feature=config,
+        config=config,
+        message=message,
+        result=result,
+        data=data,
+        ui=_build_ui(config, data, actor),
+    )

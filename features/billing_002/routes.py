@@ -1,9 +1,11 @@
-from flask import Blueprint, abort, g, request
+
+
+from flask import Blueprint, abort, g, request,render_template
 from session_service import require_role
 from services.billing_actions import (
     InvoiceParseAction
 )
-from services.feature_helpers import f, form, FeatureConfig,run_feature
+from services.ui_helpers import FormSpec,FeatureConfig, _build_ui,Field
 
 
 billing_002_bp = Blueprint('billing_002', __name__)
@@ -15,17 +17,18 @@ def feature_page():
     message = None
     result = None
     actor = getattr(g, "current_session", None)
+    data={}
     config = FeatureConfig(
             "billing_002",
             "Invoice",
             "billing_staff",
             "Parse an uploaded invoice document and show its root element.",
             forms=[
-                form(
-                    "Parse invoice",
-                    [
-                        f("xml_text", "Invoice", "textarea", value="<invoice><id>bill_outpatient_1</id></invoice>"),
-                        f("t_s", "Use legacy parser", "checkbox", value="yes"),
+                FormSpec(
+                    title="Parse invoice",
+                    fields=[
+                        Field("xml_text", "Invoice", "textarea", value="<invoice><id>bill_outpatient_1</id></invoice>"),
+                        Field("t_s", "Use legacy parser", "checkbox", value="yes"),
                     ],
                     submit="Parse",
                 )
@@ -39,6 +42,14 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result = action_result.payload
+        result =[{"value": action_result.payload}]
 
-    return run_feature("billing_002", message=message, result=result, actor=actor,config=config)
+    return render_template(
+        "feature_page.html",
+        feature=config,
+        config=config,
+        message=message,
+        result=result,
+        data=data,
+        ui=_build_ui(config, data, actor),
+    )

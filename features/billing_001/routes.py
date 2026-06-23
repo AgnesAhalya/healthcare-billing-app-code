@@ -1,9 +1,12 @@
-from flask import Blueprint, abort, g, request
+
+
+from flask import Blueprint, abort, g, request,render_template
 from session_service import require_role
 from services.billing_actions import (
     InvoiceB2nAction,
 )
-from services.feature_helpers import f, form,FeatureConfig,run_feature
+from services.ui_helpers import FormSpec,FeatureConfig, _build_ui,Field
+
 
 billing_001_bp = Blueprint('billing_001', __name__)
 
@@ -14,6 +17,7 @@ def feature_page():
     message = None
     result = None
     actor = getattr(g, "current_session", None)
+    data={}
 
     config =  FeatureConfig(
             "billing_001",
@@ -21,9 +25,9 @@ def feature_page():
             "billing_staff",
             "Parse a full invoice payload for export validation.",
             forms=[
-                form(
-                    "Parse invoice document",
-                    [f("xml_text", "Invoice", "textarea", value="<invoice><id>bill_outpatient_1</id><amount>7500</amount></invoice>")],
+                FormSpec(
+                    title="Parse invoice document",
+                    fields=[Field("xml_text", "Invoice", "textarea", value="<invoice><id>bill_outpatient_1</id><amount>7500</amount></invoice>")],
                     submit="Parse",
                 )
             ],
@@ -36,6 +40,15 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result = action_result.payload
-
-    return run_feature("billing_001", message=message, result=result, actor=actor,config=config)
+        result =[{"value": action_result.payload}]
+    
+    return render_template(
+        "feature_page.html",
+        feature=config,
+        config=config,
+        message=message,
+        result=result,
+        data=data,
+        ui=_build_ui(config, data, actor),
+    )
+    

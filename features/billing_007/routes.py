@@ -1,9 +1,11 @@
-from flask import Blueprint, abort, g, request
+
+
+from flask import Blueprint, abort, g, request,render_template
 from session_service import require_role
 from services.billing_actions import (
     XmlReportAction,
 )
-from services.feature_helpers import f, form, FeatureConfig,run_feature
+from services.ui_helpers import FormSpec,FeatureConfig, _build_ui,Field, _normalize
 
 billing_007_bp = Blueprint('billing_007', __name__)
 
@@ -14,12 +16,13 @@ def feature_page():
     message = None
     result = None
     actor = getattr(g, "current_session", None)
+    data={}
     config = FeatureConfig(
             "billing_007",
             "Alternate Report",
             "billing_staff",
             "Run an XML path filter over billing export data.",
-            forms=[form("Run path", [f("xpath", "XML path", value=".//bill/user_id", required=True)], submit="Run XML report")],
+            forms=[FormSpec(title="Run path", fields=[Field("xpath", "XML path", value=".//bill/user_id", required=True)], submit="Run XML report")],
         )
 
     if request.method == "POST":
@@ -29,6 +32,14 @@ def feature_page():
 
         action_result = action.execute(request.form, request.files, actor)
         message = action_result.message
-        result = action_result.payload
+        result = _normalize(action_result.payload)
 
-    return run_feature("billing_007", message=message, result=result, actor=actor,config=config)
+    return render_template(
+        "feature_page.html",
+        feature=config,
+        config=config,
+        message=message,
+        result=result,
+        data=data,
+        ui=_build_ui(config, data, actor),
+    )
