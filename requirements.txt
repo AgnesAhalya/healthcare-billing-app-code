@@ -1,0 +1,7 @@
+flask
+pyjwt
+cryptography
+werkzeug
+Flask-Limiter
+Flask-WTF
+defusedxml

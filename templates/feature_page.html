@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ config.title }} | {{ ui.role_label }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/patient.css') }}">
+</head>
+<body class="app-body role-{{ config.role }}">
+  <div class="app-shell">
+    <aside class="sidebar card">
+      <a class="brand" href="{{ ui.home_href }}" aria-label="Healthcare portal home">
+        <span class="brand-mark">{{ ui.role_icon }}</span>
+        <span>
+          <strong>{{ ui.role_label }}</strong>
+          <small>{{ ui.role_caption }}</small>
+        </span>
+      </a>
+
+      {% if role_nav_links %}
+      <nav class="side-nav" aria-label="Role navigation">
+        {% for label, href in role_nav_links %}
+        <a class="{{ 'active' if href == request.path else '' }}" href="{{ href }}">
+          <span>{{ label }}</span>
+          <span class="chevron">›</span>
+        </a>
+        {% endfor %}
+      </nav>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('patient_002.logout_ui') }}" class="sidebar-logout">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="secondary full-width" type="submit">Sign out</button>
+      </form>
+    </aside>
+
+    <main class="workspace">
+      <section class="page-hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">{{ ui.module_label }}</p>
+          <h1>{{ config.title }}</h1>
+          <p>{{ config.description }}</p>
+        </div>
+        <div class="hero-status">
+          <span class="actor-pill">{{ ui.actor_label }}</span>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="Feature data summary">
+        {% for metric in ui.metrics %}
+        <article class="metric-card card">
+          <span class="metric-label">{{ metric.label }}</span>
+          <strong>{{ metric.value }}</strong>
+          <small>{{ metric.caption }}</small>
+        </article>
+        {% endfor %}
+      </section>
+
+      {% if message %}
+      <section class="notice success" role="status">
+        <strong>{{ message }}</strong>
+        {% if result %}<span>{{ result|length }} returned item{{ '' if result|length == 1 else 's' }}</span>{% endif %}
+      </section>
+      {% endif %}
+
+      {% if result %}
+      <section class="card result-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Action output</p>
+            <h2>{{ config.result_label }}</h2>
+          </div>
+          <span class="count-pill">{{ result|length }} item{{ '' if result|length == 1 else 's' }}</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>{% for key in result[0].keys() %}<th>{{ key|replace('_', ' ')|title }}</th>{% endfor %}</tr>
+            </thead>
+            <tbody>
+              {% for row in result %}
+              <tr>{% for value in row.values() %}<td><pre class="inline-pre">{{ value }}</pre></td>{% endfor %}</tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {% endif %}
+
+      {% if config.forms %}
+      <section class="action-grid" aria-label="Feature actions">
+        {% for form in config.forms %}
+        <form class="card action-card" method="{{ form.method }}" {% if form.enctype %}enctype="{{ form.enctype }}"{% endif %}>
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Workflow action</p>
+              <h2>{{ form.title }}</h2>
+            </div>
+            <span class="form-index">{{ loop.index }}</span>
+          </div>
+          {% if form.action != 'default' %}<input type="hidden" name="action" value="{{ form.action }}">{% endif %}
+          {% if form.c2f %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+
+          {% if form.fields %}
+          <div class="fields">
+          {% for field in form.fields %}
+            {% set field_id = config.feature_id ~ '-' ~ loop.index ~ '-' ~ field.name %}
+            <div class="field-block kind-{{ field.kind }}">
+              {% if field.kind != 'checkbox' %}<label for="{{ field_id }}">{{ field.label }}</label>{% endif %}
+              {% if field.kind == 'textarea' %}
+                <textarea id="{{ field_id }}" name="{{ field.name }}" {% if field.required %}required{% endif %}>{{ field.value }}</textarea>
+              {% elif field.kind == 'select' %}
+                <select id="{{ field_id }}" name="{{ field.name }}" {% if field.required %}required{% endif %}>
+                  {% for option in data.get(field.options_from, []) %}
+                    <option value="{{ option.get(field.option_value, '') }}">{{ option.get(field.option_label, option.get(field.option_value, 'record')) }}</option>
+                  {% else %}
+                    <option value="" disabled>No available {{ field.label|lower }}</option>
+                  {% endfor %}
+                </select>
+              {% elif field.kind == 'checkbox' %}
+                <label class="check" for="{{ field_id }}"><input id="{{ field_id }}" type="checkbox" name="{{ field.name }}" value="{{ field.value }}"> {{ field.label }}</label>
+              {% else %}
+                <input id="{{ field_id }}" type="{{ field.kind }}" name="{{ field.name }}" value="{{ field.value }}" {% if field.required %}required{% endif %}>
+              {% endif %}
+              {% if field.example %}<p class="field-hint">Example: {{ field.example }}</p>{% endif %}
+            </div>
+          {% endfor %}
+          </div>
+          {% else %}
+          <p class="field-hint">This action uses the records already visible on this page.</p>
+          {% endif %}
+          <button type="submit">{{ form.submit }}</button>
+        </form>
+        {% endfor %}
+      </section>
+      {% endif %}
+
+      {% for table in config.tables %}
+      <section class="card data-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Live data</p>
+            <h2>{{ table.title }}</h2>
+          </div>
+          <span class="count-pill">{{ data.get(table.data_key, [])|length }} rows</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>{% for col, label in table.columns %}<th>{{ label }}</th>{% endfor %}</tr></thead>
+            <tbody>
+            {% for row in data.get(table.data_key, []) %}
+              <tr>
+                {% for col, label in table.columns %}
+                {% set cell = row.get(col, '') %}
+                <td class="cell-{{ col }}">
+                  {% if col in ['status', 'role_name', 'user_type', 'content_type'] %}
+                    <span class="status-chip">{{ cell }}</span>
+                  {% else %}
+                    {{ cell }}
+                  {% endif %}
+                </td>
+                {% endfor %}
+              </tr>
+            {% else %}
+              <tr><td colspan="{{ table.columns|length }}" class="empty-cell">{{ ui.empty_message }}</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {% endfor %}
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Billing Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/patient.css') }}">
+</head>
+<body class="auth-body">
+  <main class="auth-layout">
+    <section class="auth-panel card">
+      <p class="eyebrow">Hospital billing access</p>
+      <h1>Sign in to the reduced billing workspace</h1>
+      <p class="auth-lede">This package contains only the billing routes and their matching ground-truth scenarios.</p>
+      <div class="role-strip"><span>Billing</span><span>Invoices</span><span>Payments</span><span>Reports</span></div>
+    </section>
+
+    <section class="card auth-card">
+      <div class="section-heading"><div><p class="eyebrow">Access form</p><h2>Login</h2></div></div>
+      <form method="post" class="stacked-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="username">Username</label>
+        <input id="username" name="username" required autocomplete="username" value="billing">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" value="staff-pass">
+        <input type="hidden" name="usertype" value="billing_staff">
+        <button type="submit">Open billing workspace</button>
+        {% if error %}<p class="notice error">{{ error }}</p>{% endif %}
+      </form>
+    </section>
+
+    <section class="card accounts-card">
+      <div class="section-heading"><div><p class="eyebrow">Seeded access</p><h2>Available test user</h2></div></div>
+      <div class="account-grid"><div><strong>Billing</strong><span>billing / staff-pass</span></div></div>
+    </section>
+  </main>
+</body>
+</html>
