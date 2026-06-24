@@ -1,35 +1,32 @@
 {% extends "billing/_base.html" %}
 
-{% block metrics %}
-<section class="metric-grid" aria-label="Payment entry summary">
-  <article class="metric-card card">
-    <span class="metric-label">Bills</span>
-    <strong>{{ bills|length }}</strong>
-    <small>Bills currently visible</small>
-  </article>
-  <article class="metric-card card">
-    <span class="metric-label">Payments</span>
-    <strong>{{ payments|length }}</strong>
-    <small>Payment entries currently visible</small>
-  </article>
-</section>
-{% endblock %}
-
 {% block content %}
+
 {% if result %}
 <section class="card result-card">
   <div class="section-heading">
-    <div><p class="eyebrow">Action output</p><h2>Created payment</h2></div>
-    <span class="count-pill">{{ result|length }} item{{ '' if result|length == 1 else 's' }}</span>
+    <div>
+      <p class="eyebrow">Action output</p>
+      <h2>Created payment entry</h2>
+    </div>
+    <span class="count-pill">
+      {{ result|length }} item{{ '' if result|length == 1 else 's' }}
+    </span>
   </div>
+
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Payment</th><th>Amount cents</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Payment ID</th>
+          <th>Amount cents</th>
+        </tr>
+      </thead>
       <tbody>
         {% for item in result %}
         <tr>
           <td><pre class="inline-pre">{{ item.get('payment_id', '') }}</pre></td>
-          <td><pre class="inline-pre">{{ item.get('amount_cents', '') }}</pre></td>
+          <td>{{ item.get('amount_cents', '') }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -42,87 +39,103 @@
   <form class="card action-card" method="post">
     <div class="section-heading compact">
       <div>
-        <p class="eyebrow">Workflow action</p>
+        <p class="eyebrow">billing_004</p>
         <h2>Create payment entry</h2>
       </div>
-      <span class="form-index">1</span>
+      <span class="form-index">4</span>
     </div>
+
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <div class="fields">
-      <div class="field-block kind-select">
-        <label for="billing-004-bill-id">Bill</label>
-        <select id="billing-004-bill-id" name="bill_id">
-          {% for bill in bills %}
-          <option value="{{ bill.get('bill_id', '') }}">{{ bill.get('description', bill.get('bill_id', 'record')) }}</option>
-          {% else %}
-          <option value="" disabled>No available bills</option>
-          {% endfor %}
-        </select>
+      <div class="field-block kind-text">
+        <label for="billing-004-bill-id">Bill ID</label>
+        <input
+          id="billing-004-bill-id"
+          name="bill_id"
+          value="{{ bill_id }}"
+          placeholder="bill_001"
+          required
+        >
       </div>
+
       <div class="field-block kind-text">
         <label for="billing-004-user-id">Patient user ID</label>
-        <input id="billing-004-user-id" name="user_id" value="{{ user_id }}" required>
+        <input
+          id="billing-004-user-id"
+          name="user_id"
+          value="{{ user_id }}"
+          placeholder="user_outpatient_1"
+          required
+        >
       </div>
+
       <div class="field-block kind-text">
         <label for="billing-004-amount-cents">Amount cents</label>
-        <input id="billing-004-amount-cents" name="amount_cents" value="{{ amount_cents }}" required>
+        <input
+          id="billing-004-amount-cents"
+          name="amount_cents"
+          value="{{ amount_cents }}"
+          required
+        >
       </div>
+
       <div class="field-block kind-text">
         <label for="billing-004-note">Note</label>
-        <input id="billing-004-note" name="note" value="{{ note }}">
-        <p class="field-hint">Example: Counter payment</p>
+        <input
+          id="billing-004-note"
+          name="note"
+          value="{{ note }}"
+          placeholder="Counter payment"
+        >
       </div>
     </div>
-    <button type="submit">Create entry</button>
+
+    <button type="submit">Create payment entry</button>
   </form>
 </section>
 
 <section class="card data-card">
   <div class="section-heading">
-    <div><p class="eyebrow">Live data</p><h2>Bills</h2></div>
-    <span class="count-pill">{{ bills|length }} rows</span>
+    <div>
+      <p class="eyebrow">Payment entries</p>
+      <h2>Existing payment records</h2>
+    </div>
+    <span class="count-pill">
+      {{ payments|length }} row{{ '' if payments|length == 1 else 's' }}
+    </span>
   </div>
+
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Bill</th><th>Patient</th><th>Amount cents</th><th>Status</th></tr></thead>
-      <tbody>
-        {% for bill in bills %}
+      <thead>
         <tr>
-          <td>{{ bill.get('bill_id', '') }}</td>
-          <td>{{ bill.get('display_name', '') }}</td>
-          <td>{{ bill.get('amount_cents', '') }}</td>
-          <td><span class="status-chip">{{ bill.get('status', '') }}</span></td>
+          <th>Payment ID</th>
+          <th>Bill ID</th>
+          <th>Patient</th>
+          <th>Amount cents</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in payments %}
+        <tr>
+          <td><pre class="inline-pre">{{ payment.get('payment_id', '') }}</pre></td>
+          <td><pre class="inline-pre">{{ payment.get('bill_id', '') }}</pre></td>
+          <td>{{ payment.get('display_name', '') }}</td>
+          <td>{{ payment.get('amount_cents', '') }}</td>
+          <td>{{ payment.get('note', '') }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="4" class="empty-cell">No bill records are available for this signed-in workspace yet.</td></tr>
+        <tr>
+          <td colspan="5" class="empty-cell">
+            No payment entries are available.
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </section>
 
-<section class="card data-card">
-  <div class="section-heading">
-    <div><p class="eyebrow">Live data</p><h2>Payments</h2></div>
-    <span class="count-pill">{{ payments|length }} rows</span>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Payment</th><th>Bill</th><th>Patient</th><th>Amount cents</th><th>Note</th></tr></thead>
-      <tbody>
-        {% for payment in payments %}
-        <tr>
-          <td>{{ payment.get('payment_id', '') }}</td>
-          <td>{{ payment.get('bill_id', '') }}</td>
-          <td>{{ payment.get('display_name', '') }}</td>
-          <td>{{ payment.get('amount_cents', '') }}</td>
-          <td>{{ payment.get('note', '') }}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="5" class="empty-cell">No payment records are available for this signed-in workspace yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
 {% endblock %}

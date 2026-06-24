@@ -1,0 +1,134 @@
+{% extends "billing/_base.html" %}
+
+{% block content %}
+
+{% if result %}
+<section class="card result-card">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Action output</p>
+      <h2>Marked bill</h2>
+    </div>
+    <span class="count-pill">
+      {{ result|length }} item{{ '' if result|length == 1 else 's' }}
+    </span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Patient ID</th>
+          <th>Amount</th>
+          <th>Description</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in result %}
+        <tr>
+          <td><pre class="inline-pre">{{ item.get('user_id', '') }}</pre></td>
+          <td>{{ item.get('amount_cents', '') }} cents</td>
+          <td>{{ item.get('description', '') }}</td>
+          <td>
+            <span class="status-chip">{{ item.get('status', '') }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<section class="action-grid" aria-label="Bill payment actions">
+  <form class="card action-card" method="post">
+    <div class="section-heading compact">
+      <div>
+        <p class="eyebrow">billing_002</p>
+        <h2>Mark patient bill paid</h2>
+      </div>
+      <span class="form-index">2</span>
+    </div>
+
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="fields">
+      <div class="field-block kind-select">
+        <label for="billing-002-user-id">Patient</label>
+
+        <select id="billing-002-user-id" name="user_id" required>
+          <option value="" disabled {{ 'selected' if not selected_user_id else '' }}>
+            Choose patient
+          </option>
+
+          {% for patient in patients %}
+          <option
+            value="{{ patient.get('user_id', '') }}"
+            {{ 'selected' if selected_user_id == patient.get('user_id', '') else '' }}
+          >
+            {{ patient.get('display_name', '') }}
+            · {{ patient.get('user_id', '') }}
+            · {{ patient.get('user_type', '') }}
+          </option>
+          {% else %}
+          <option value="" disabled>No patients available</option>
+          {% endfor %}
+        </select>
+
+        <p class="field-hint">
+          This intentionally uses only the selected user ID to mark a bill as paid.
+        </p>
+      </div>
+    </div>
+
+    <button type="submit">Mark paid</button>
+  </form>
+</section>
+
+<section class="card data-card">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Patients</p>
+      <h2>All patients</h2>
+    </div>
+    <span class="count-pill">
+      {{ patients|length }} row{{ '' if patients|length == 1 else 's' }}
+    </span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Patient ID</th>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for patient in patients %}
+        <tr>
+          <td><pre class="inline-pre">{{ patient.get('user_id', '') }}</pre></td>
+          <td>{{ patient.get('display_name', '') }}</td>
+           <td>{{ patient.get('masked_phone', '') }}</td>
+          <td>
+            <span class="status-chip">
+              {{ patient.get('user_type', '') }}
+            </span>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="empty-cell">
+            No patients found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}

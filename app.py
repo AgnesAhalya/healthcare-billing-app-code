@@ -90,12 +90,13 @@ def create_app():
         return {
             "role_nav_links": [
                 ("Patients", "/billing-patient-view"),
-                ("Payments", "/billing-payments"),
+                ("Payments", "/billing-payment-entries"),
                 ("External", "/billing-payments-external"),
-                ("Invoice", "/billing-invoices-sec"),
+                ("Mark Bill", "/billing-mark-bill"),
                 ("Parser", "/billing-invoices"),
                 ("Report", "/billing-reports"),
                 ("Report Alternative", "/billing-reports-xpf"),
+                ("Exit", "//logout"),
             ]
         }
 

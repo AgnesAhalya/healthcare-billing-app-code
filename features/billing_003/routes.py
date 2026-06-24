@@ -1,6 +1,6 @@
 from flask import Blueprint, g, render_template
 
-from services.billing_readers import list_limited_patients
+from services.billing_readers import list_all_patients
 from session_service import require_role
 
 
@@ -20,5 +20,5 @@ def billing_patient_view_feature_page():
         actor_label=current_actor_label,
         message=None,
         result=None,
-        patients=list_limited_patients(),
+        patients=list_all_patients(),
     )

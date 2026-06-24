@@ -36,5 +36,5 @@ def billing_payments_external_feature_page():
         message=message,
         result=result,
         bills=list_all_bills(),
-        processor_host=request.form.get("processor_host", DEFAULT_PROCESSOR_HOST),
+        pro_hst=request.form.get("pro_hst", DEFAULT_PROCESSOR_HOST),
     )
