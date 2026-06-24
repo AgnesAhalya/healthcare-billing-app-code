@@ -68,15 +68,15 @@ class ReportQueryAction(ActionService):
         return ActionResult("Invalid Query", [dict(row) for row in rows])
 
 class InvoiceParseAction(ActionService):
-    def __init__(self, use_legacy_parser: bool = False,legacy_parser: Sf_Xml_Parser | None = None):
-        self.use_legacy_parser = use_legacy_parser
-        self.legacy_parser = legacy_parser or Sf_Xml_Parser()
+    def __init__(self, use_defused_xml_parser: bool = False,defused_xml_parser: Sf_Xml_Parser | None = None):
+        self.use_defused_xml_parser = use_defused_xml_parser
+        self.defused_xml_parser = defused_xml_parser or Sf_Xml_Parser()
 
     def execute(self, form, files, actor):
         xml_text = get_user_data()
        
-        if self.use_legacy_parser or form.get("t_s") == "yes":
-                tag = self.legacy_parser(xml_text)
+        if self.use_defused_xml_parser or form.get("t_s") == "yes":
+                tag = self.defused_xml_parser(xml_text)
         else:
                 tag = safe_fromstring(xml_text).tag
 
